@@ -1,0 +1,1 @@
+insert into customer (birth_date, customer_role, firstname, lastname, id) values ({ts '1988-09-09'}, 1, 'Alex', 'Ivanov' , 3),({ts '1999-01-30'}, 3, 'Petr', 'Petrov' , 4),({ts '1975-03-14'}, 2, 'Ivan', 'Sidorov' , 5),({ts '2000-09-23'}, 1, 'Zoi', 'Smirnova' , 6),({ts '1979-11-11'}, 1, 'Mikhail', 'Stern' , 7);
