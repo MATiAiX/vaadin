@@ -32,22 +32,29 @@ public class MainView extends VerticalLayout {
         customerform = new CustomerForm(this, customerService);
 
         filterLastnameTextField = new TextField();
-        filterLastnameTextField.setPlaceholder("Filter by lastname...");
+        filterLastnameTextField.setPlaceholder("Фильтрация по фамилии...");
         filterLastnameTextField.setClearButtonVisible(true);
         filterLastnameTextField.setValueChangeMode(ValueChangeMode.EAGER);
         filterLastnameTextField.addValueChangeListener(e -> updateGrid());
 
-        customerGrid = new Grid<>(Customer.class);
+        customerGrid = new Grid<>();
         customerGrid.setMinWidth("600px");
-        customerGrid.setColumns("lastname", "firstname", "customerRole");
+        customerGrid.addColumn(Customer::getLastname)
+                .setHeader("Фамилия")
+                .setSortable(true);
+        customerGrid.addColumn(Customer::getFirstname)
+                .setHeader("Имя")
+                .setSortable(true);
+        customerGrid.addColumn(customer -> customer.getCustomerRole().getName())
+                .setHeader("Роль клиента")
+                .setSortable(true);
         customerGrid.asSingleSelect().addValueChangeListener(e ->
                 customerform.setCustomer(customerGrid.asSingleSelect().getValue()));
-
         customerform.setWidth("400px");
         customerform.setCustomer(null);
 
 
-        Button addCustomerButton = new Button("Add new customer");
+        Button addCustomerButton = new Button("Добавить нового клиента");
         addCustomerButton.addClickListener(e -> {
             customerGrid.asSingleSelect().clear();
             customerform.setCustomer(new Customer());
@@ -72,11 +79,11 @@ public class MainView extends VerticalLayout {
     }
 
     private void addTestData() {
-        customerService.save(new Customer("alex", "ivanov", CustomerRole.RETAIL, LocalDate.of(1987, 8, 24)));
-        customerService.save(new Customer("alex1", "ivanov2", CustomerRole.CONTRACT, LocalDate.of(1988, 1, 12)));
-        customerService.save(new Customer("alex2", "sidorov", CustomerRole.WHOLESALE, LocalDate.of(1989, 4, 1)));
-        customerService.save(new Customer("alex3", "pimanov", CustomerRole.RETAIL, LocalDate.of(1999, 5, 8)));
-        customerService.save(new Customer("alex4", "kukumber", CustomerRole.RETAIL, LocalDate.of(200, 11, 29)));
+        customerService.save(new Customer("Алексей", "Иванов", CustomerRole.RETAIL, LocalDate.of(1987, 8, 24)));
+        customerService.save(new Customer("Алексей1", "Иванов2", CustomerRole.CONTRACT, LocalDate.of(1988, 1, 12)));
+        customerService.save(new Customer("Алексей2", "Сидоров", CustomerRole.WHOLESALE, LocalDate.of(1989, 4, 1)));
+        customerService.save(new Customer("Алексей3", "Пиманов", CustomerRole.RETAIL, LocalDate.of(1999, 5, 8)));
+        customerService.save(new Customer("Алексей4", "Кукумберов", CustomerRole.RETAIL, LocalDate.of(200, 11, 29)));
     }
 
 }
