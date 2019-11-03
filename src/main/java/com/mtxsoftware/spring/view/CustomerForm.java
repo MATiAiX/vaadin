@@ -13,14 +13,14 @@ import com.vaadin.flow.data.binder.Binder;
 
 public class CustomerForm extends FormLayout {
 
-    private TextField firstname = new TextField("First name");
-    private TextField lastname = new TextField("Last name");
-    private ComboBox<CustomerRole> customerRole = new ComboBox<>("Role");
-    private DatePicker birthDate = new DatePicker("Birthdate");
+    private TextField firstname = new TextField("Имя");
+    private TextField lastname = new TextField("Фамилия");
+    private ComboBox<CustomerRole> customerRole = new ComboBox<>("Роль");
+    private DatePicker birthDate = new DatePicker("День рождения");
     public Binder<Customer> binder = new Binder<>(Customer.class);
 
-    private Button saveButton = new Button("Save");
-    private Button deleteButton = new Button("Delete");
+    private Button saveButton = new Button("Сохранить");
+    private Button deleteButton = new Button("Удалить");
 
     private MainView mainView;
     private CustomerService customerService;
@@ -30,6 +30,7 @@ public class CustomerForm extends FormLayout {
         this.customerService = customerService;
 
         customerRole.setItems(CustomerRole.values());
+        customerRole.setItemLabelGenerator(CustomerRole::getName);
 
         saveButton.addClickListener(e -> save());
         deleteButton.addClickListener(e -> delete());
