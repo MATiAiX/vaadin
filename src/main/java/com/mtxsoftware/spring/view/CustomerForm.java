@@ -7,14 +7,13 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.combobox.ComboBox;
 import com.vaadin.flow.component.datepicker.DatePicker;
 import com.vaadin.flow.component.dialog.Dialog;
-import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.*;
 
-public class CustomerForm extends FormLayout {
+public class CustomerForm extends Dialog {
 
     private TextField firstname = new TextField("Имя");
     private TextField lastname = new TextField("Фамилия");
@@ -23,7 +22,7 @@ public class CustomerForm extends FormLayout {
     private BeanValidationBinder<Customer> binder = new BeanValidationBinder<>(Customer.class);
 
     private Button saveButton = new Button("Сохранить");
-    private Button deleteButton = new Button("Удалить");
+    private Button cancelButton = new Button("Отмена");
 
     private MainView mainView;
     private CustomerService customerService;
@@ -34,13 +33,17 @@ public class CustomerForm extends FormLayout {
 
         customerRole.setItems(CustomerRole.values());
         customerRole.setItemLabelGenerator(CustomerRole::getName);
-        customerRole.setValue(CustomerRole.RETAIL);
 
         saveButton.addClickListener(e -> save());
-        deleteButton.addClickListener(e -> delete());
-        HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, deleteButton);
-        add(firstname, lastname, customerRole, birthDate, buttonsLayout);
+        cancelButton.addClickListener(e -> this.close());
+        HorizontalLayout buttonsLayout = new HorizontalLayout(saveButton, cancelButton);
 
+        HorizontalLayout fioFields = new HorizontalLayout(firstname, lastname);
+        HorizontalLayout paramFields = new HorizontalLayout(customerRole, birthDate);
+
+        VerticalLayout fields = new VerticalLayout();
+        fields.add(fioFields, paramFields);
+        this.add(fields, buttonsLayout);
 
         binder.bindInstanceFields(this);
     }
@@ -49,14 +52,13 @@ public class CustomerForm extends FormLayout {
         Dialog dialog = new Dialog();
         VerticalLayout layout = new VerticalLayout();
         layout.add(new Label("Поля фамилии и имени не должны содержать спецсимволы. Все поля обязательны для заполнения"));
-        layout.add(new Button("Cancel", event -> dialog.close()));
+        layout.add(new Button("Ок", event -> dialog.close()));
         dialog.add(layout);
 
         dialog.setWidth("400px");
         dialog.setHeight("150px");
         dialog.setCloseOnOutsideClick(false);
         dialog.open();
-
     }
 
     private void save() {
@@ -67,24 +69,10 @@ public class CustomerForm extends FormLayout {
         Customer customer = binder.getBean();
         customerService.save(customer);
         mainView.updateGrid();
-        setCustomer(null);
-    }
-
-    private void delete() {
-        Customer customer = binder.getBean();
-        customerService.delete(customer);
-        mainView.updateGrid();
-        setCustomer(null);
+        this.close();
     }
 
     public void setCustomer(Customer customer) {
         binder.setBean(customer);
-
-        if (customer == null) {
-            setVisible(false);
-        } else {
-            setVisible(true);
-            firstname.focus();
-        }
     }
 }
