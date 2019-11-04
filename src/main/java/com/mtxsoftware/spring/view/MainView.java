@@ -4,7 +4,9 @@ import com.mtxsoftware.spring.model.Customer;
 import com.mtxsoftware.spring.model.CustomerRole;
 import com.mtxsoftware.spring.service.CustomerService;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.grid.Grid;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.value.ValueChangeMode;
@@ -30,6 +32,9 @@ public class MainView extends VerticalLayout {
         addTestData();
 
         customerform = new CustomerForm(this, customerService);
+        customerform.setCloseOnOutsideClick(false);
+        customerform.setWidth("600px");
+        customerform.setHeight("400px");
 
         filterLastnameTextField = new TextField();
         filterLastnameTextField.setPlaceholder("Фильтрация по фамилии...");
@@ -38,7 +43,7 @@ public class MainView extends VerticalLayout {
         filterLastnameTextField.addValueChangeListener(e -> updateGrid());
 
         customerGrid = new Grid<>();
-        customerGrid.setMinWidth("600px");
+        customerGrid.setMinWidth("800px");
         customerGrid.addColumn(Customer::getLastname)
                 .setHeader("Фамилия")
                 .setSortable(true);
@@ -48,20 +53,39 @@ public class MainView extends VerticalLayout {
         customerGrid.addColumn(customer -> customer.getCustomerRole().getName())
                 .setHeader("Роль клиента")
                 .setSortable(true);
-        customerGrid.asSingleSelect().addValueChangeListener(e ->
-                customerform.setCustomer(customerGrid.asSingleSelect().getValue()));
-        customerform.setWidth("400px");
-        customerform.setCustomer(null);
 
 
-        Button addCustomerButton = new Button("Добавить нового клиента");
+        Button addCustomerButton = new Button("Добавить");
         addCustomerButton.addClickListener(e -> {
-            customerGrid.asSingleSelect().clear();
-            customerform.setCustomer(new Customer());
+            Customer customer = new Customer();
+            customer.setCustomerRole(CustomerRole.RETAIL);
+            customer.setBirthDate(LocalDate.now().minusYears(25));
+            customerform.setCustomer(customer);
+            customerform.open();
+        });
+
+        Button editCustomerButton = new Button("Изменить");
+        editCustomerButton.addClickListener(e -> {
+            if (customerGrid.asSingleSelect().getValue() == null) {
+                showNeedSelectCustomer();
+                return;
+            }
+            customerform.setCustomer(customerGrid.asSingleSelect().getValue());
+            customerform.open();
+        });
+
+        Button deleteCustomerButton = new Button("Удалить");
+        deleteCustomerButton.addClickListener(e -> {
+            if (customerGrid.asSingleSelect().getValue() == null) {
+                showNeedSelectCustomer();
+                return;
+            }
+            customerService.delete(customerGrid.asSingleSelect().getValue());
+            updateGrid();
         });
 
         HorizontalLayout uiActionElements = new HorizontalLayout();
-        uiActionElements.add(filterLastnameTextField, addCustomerButton);
+        uiActionElements.add(filterLastnameTextField, addCustomerButton, editCustomerButton, deleteCustomerButton);
 
         add(uiActionElements);
 
@@ -70,6 +94,19 @@ public class MainView extends VerticalLayout {
         add(horizontalLayout);
 
         updateGrid();
+    }
+
+    private void showNeedSelectCustomer() {
+        Dialog dialog = new Dialog();
+        VerticalLayout layout = new VerticalLayout();
+        layout.add(new Label("Необходимо выбрать клиента в таблице"));
+        layout.add(new Button("Ок", event -> dialog.close()));
+        dialog.add(layout);
+
+        dialog.setWidth("400px");
+        dialog.setHeight("150px");
+        dialog.setCloseOnOutsideClick(false);
+        dialog.open();
     }
 
     public void updateGrid() {
